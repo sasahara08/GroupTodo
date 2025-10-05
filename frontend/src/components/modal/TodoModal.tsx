@@ -62,11 +62,9 @@ export function TodoModal({
         }
         // プレビューモードであり、todoのIDが指定されている場合のみ実行
         if (todos && display_todo_number) {
-            // 指定されたIDを持つTodoを探す
             const selectedTodo = todos.find(todo => todo.id === display_todo_number);
 
             if (selectedTodo) {
-                // 見つかったTodoのデータでフォームを更新
                 form.reset();
                 form.setValues({
                     title: selectedTodo.title,
@@ -77,7 +75,7 @@ export function TodoModal({
 
                 // 既存Todoのbase64画像をセット
                 setExistingImage(selectedTodo.image_url || null);
-                setFile(null); // 新規アップロードはなし
+                setFile(null);
             } else {
                 setExistingImage(null);
                 setFile(null);
@@ -113,7 +111,7 @@ export function TodoModal({
             setErrorMsg('不正なグループです');
             return;
         }
-        if (propsMethod) { // 存在チェック
+        if (propsMethod) {
             const res = await propsMethod(display_todo_number, {...values}, group_id, file);
             if (res) {
                 form.setErrors(res);
@@ -173,6 +171,9 @@ export function TodoModal({
                                 label="期限"
                                 placeholder="期限を選択"
                                 minDate={today}
+                                valueFormat="YYYY年MM月DD日"
+                                locale="ja"
+                                dropdownType="modal"
                                 clearable
                                 {...form.getInputProps('due_date')}
                             />

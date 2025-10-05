@@ -33,7 +33,7 @@ class TodoController extends Controller
                     $todo->save();
                     return response()->json(['is_lock' => false, 'lock_user' => $user->name], 201);
                 } else {
-                    // 排他ロック実行
+                    // 排他ロック制御
                     $lock_user = User::find($todo->lock_user_id);
                     return response()->json(['is_lock' => true, 'lock_user' => $lock_user->name], 423);
                 }
@@ -44,6 +44,7 @@ class TodoController extends Controller
                 $todo->save();
                 return response()->json(['is_lock' => false, 'lock_user' => ''], 201);
             }
+            return;
         } catch (\Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }

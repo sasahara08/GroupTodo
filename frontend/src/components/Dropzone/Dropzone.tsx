@@ -114,9 +114,6 @@ export function TodoDropzone({ file, onFileSelect, onBase64Image, is_preview, ba
                   <Dropzone.Reject>Only images under 50MB</Dropzone.Reject>
                   <Dropzone.Idle>Upload image</Dropzone.Idle>
                 </Text>
-                <Text ta="center" c="dimmed">
-                  We accept only <i>.jpg, .png</i> files under 50MB
-                </Text>
 
                 <Stack align="center">
                   <Button

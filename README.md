@@ -1,114 +1,99 @@
-了解です 👍（←これは最後の絵文字）
-絵文字を除いたクリーンな `README.md` 版を以下に示します。
-そのままコピーしてプロジェクト直下に `README.md` として保存できます。
+# GroupTodo - Laravel + Vite + React
 
----
+<br>
+<br>
 
-# GroupTodo - Laravel + Vite + React Todo管理アプリ
+# 概要
 
-![screenshot](public/images/screenshot.png)
+疑似インターンで作成したGroupで共有するTodoアプリについて、レビューでアドバイスいただいた点を追加しブラッシュアップしたものです。
 
-## 概要
+<br>
+<br>
 
-このアプリは、**Laravel（APIサーバー）** と **React（フロントエンド）** を組み合わせた
-グループ向けのTodo管理システムです。
+# 主な追加機能
 
-画像アップロードには **MinIO（S3互換ストレージ）** を使用しています。
-
----
-
-## 主な機能
-
-* Todoの登録・編集・削除（非同期通信）
-* 期限付きTodo管理（DatePicker対応）
 * 画像添付（MinIOにアップロード）
-* グループ共有機能
-* Sanctumによるログイン認証
+* グループ招待制度
+* Todo編集時の排他制御
+* 画面内通知
 
----
 
-## 環境構成
 
-| 項目      | 内容              |
-| ------- | --------------- |
-| バックエンド  | Laravel 11      |
-| フロントエンド | React + Vite    |
-| ストレージ   | MinIO           |
-| データベース  | MySQL           |
-| セッション管理 | Database Driver |
+## 画像添付（MinIOにアップロード）
+- フォームはmantineの「Dropzone」コンポーネントを使用、参照はmantine UI
+- fileを送信してminIOに送信
+- 表示時はbase64に変換してフロントに渡して表示
+  - 直接URLが知られない、jsonでフロントに返せるため
+#### 躓きポイント
+- minIOの読み方が'ミニオ'かと思っていたが'ミンアイオー'とのこと
+- .envでminioの接続設定を行ったが、docker-compose.ymlでも設定を行っていた為、接続設定が重複していた。
+  - envでバケット名を設定したが中々適用されず設定に時間を要した→docker-compose.yml修正で改善
 
----
 
-## 環境変数設定例（`.env`）
+<img src="./ReadmeImage/image.png" width="25%" alt="ファイルアップロード">
 
-```env
-APP_URL=http://localhost
-FRONT_URL=http://localhost:5173
+<img src="./ReadmeImage/image-1.png" width="25%" alt="ファイルアップロード">
 
-SESSION_DRIVER=database
-SESSION_DOMAIN=localhost
-SANCTUM_STATEFUL_DOMAINS=localhost:5173
+#### 鉛筆マークで編集画面表示
+<img src="./ReadmeImage/image-2.png" width="25%" alt="ファイルアップロード">
 
-MINIO_ENDPOINT=http://localhost:9000
-MINIO_KEY=minioadmin
-MINIO_SECRET=minioadmin
-MINIO_BUCKET=todo-bucket
+↓
+
+<img src="./ReadmeImage/image-3.png" width="25%" alt="ファイルアップロード">
+
+## Todo編集画面表示時の排他制御(楽観ロック)
+
+- 「todos」テーブルに「lock_time」と「lock_user_id」カラムを設定した。
+- todoの編集フォーム(モーダル)を開くときに「オープン」or「クローズ」のフラグを合わせて送りオープンの時はロック、クローズの時はロック解除の制御を行った。
+- ロック時間は30分、ロック中に編集画面を他のユーザーが開くと、ロックされている旨の表示を行う。
+
+```排他制御部
+public function updateLock(Request $request, $id)
+    {
+        try {
+            $todo = Todo::find($id);
+            $user = Auth::user();
+            $opened = $request->boolean('opened');
+            $is_lock_user = $todo->lock_user_id === $user->id;
+            // 編集モーダルオープン時
+            if ($opened) {
+                if (!($todo->lock_time) || $todo->lock_time->diffInMinutes(now()) > 30 || $is_lock_user) {
+                    // 排他ロック登録
+                    $todo->lock_time = now();
+                    $todo->lock_user_id = Auth::id();
+                    $todo->save();
+                    return response()->json(['is_lock' => false, 'lock_user' => $user->name], 201);
+                } else {
+                    // 排他ロック制御
+                    $lock_user = User::find($todo->lock_user_id);
+                    return response()->json(['is_lock' => true, 'lock_user' => $lock_user->name], 423);
+                }
+                // ロックユーザーがモーダルをクローズ
+            } else if ($is_lock_user) {
+                $todo->lock_time = null;
+                $todo->lock_user_id = null;
+                $todo->save();
+                return response()->json(['is_lock' => false, 'lock_user' => ''], 201);
+            }
+            return
+        } catch (\Throwable $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
 ```
 
----
+<img src="./ReadmeImage/image-6.png" width="50%" alt="ファイルアップロード">
 
-## 起動方法
+<img src="./ReadmeImage/image-7.png" width="50%" alt="ファイルアップロード">
 
-### バックエンド（Laravel）
+<img src="./ReadmeImage/Animation.gif" width="50%" alt="ファイルアップロード">
 
-```bash
-composer install
-php artisan migrate
-php artisan serve
-```
+## グループ招待
 
-### フロントエンド（React）
+- 招待されるとサイドバーに未加入グループが表示されるようになります。
+- 参加するボタンを押下することでtodoを共有できるようになります。
+- アプリ内各所にmantineの通知を表示するようにしています。(画面右下表示)
 
-```bash
-npm install
-npm run dev
-```
+<img src="./ReadmeImage/image-4.png" width="25%" alt="ファイルアップロード">
 
----
-
-## 画面イメージ
-
-| Todo一覧                             | 登録モーダル                              |
-| ---------------------------------- | ----------------------------------- |
-| ![一覧](public/images/todo_list.png) | ![登録](public/images/todo_modal.png) |
-
----
-
-## ディレクトリ構成
-
-```
-app/
-├─ Http/Controllers/TodoController.php
-├─ Models/Todo.php
-resources/
-├─ js/
-│   ├─ components/
-│   │   ├─ TodoList.jsx
-│   │   ├─ TodoModal.jsx
-│   │   └─ Dropzone.jsx
-│   └─ pages/Home.jsx
-public/
-└─ images/
-    ├─ screenshot.png
-    ├─ todo_list.png
-    └─ todo_modal.png
-```
-
----
-
-## 開発者
-
-* 開発者: sasahara08
-* リポジトリ: [https://github.com/sasahara08/GroupTodo](https://github.com/sasahara08/GroupTodo)
-
----
+<img src="./ReadmeImage/image-5.png" width="25%" alt="ファイルアップロード">

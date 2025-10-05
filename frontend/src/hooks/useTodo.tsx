@@ -118,22 +118,17 @@ export const useTodo = () => {
 
     }
 
-    const edit_lock = async (todo_id: number, opened:boolean) => {
+    // opened:モーダルオープン時trueクローズ時false
+    const edit_lock = async (todo_id: number, opened: boolean) => {
         try {
-            await create_axios.post(`/todo/updateLock/${todo_id}`, {opened:opened}, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            })
+            await create_axios.post(`/todo/updateLock/${todo_id}`, { opened: opened })
                 .then(res => {
-                    console.log(res)
                     setIsLock(res.data.is_lock);
                     setEditerLockUser(res.data.lock_user)
                 });
-        } catch (error:any) {
-            console.log(error)
-                    setIsLock(error.response.data.is_lock);
-                    setEditerLockUser(error.response.data.lock_user)
+        } catch (error: any) {
+            setIsLock(error.response.data.is_lock);
+            setEditerLockUser(error.response.data.lock_user)
         }
     }
 
