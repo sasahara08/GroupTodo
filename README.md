@@ -30,16 +30,16 @@
   - envでバケット名を設定したが中々適用されず設定に時間を要した→docker-compose.yml修正で改善
 
 
-<img src="./ReadmeImage/image.png" width="25%" alt="ファイルアップロード">
+<img src="./ReadmeImage/image.png" width="100%" alt="ファイルアップロード">
 
-<img src="./ReadmeImage/image-1.png" width="25%" alt="ファイルアップロード">
+<img src="./ReadmeImage/image-1.png" width="100%" alt="ファイルアップロード">
 
 #### 鉛筆マークで編集画面表示
-<img src="./ReadmeImage/image-2.png" width="25%" alt="ファイルアップロード">
+<img src="./ReadmeImage/image-2.png" width="100%" alt="ファイルアップロード">
 
 ↓
 
-<img src="./ReadmeImage/image-3.png" width="25%" alt="ファイルアップロード">
+<img src="./ReadmeImage/image-3.png" width="100%" alt="ファイルアップロード">
 
 ## Todo編集画面表示時の排他制御(楽観ロック)
 
@@ -82,11 +82,11 @@ public function updateLock(Request $request, $id)
     }
 ```
 
-<img src="./ReadmeImage/image-6.png" width="50%" alt="ファイルアップロード">
+<img src="./ReadmeImage/image-6.png" width="100%" alt="ファイルアップロード">
 
-<img src="./ReadmeImage/image-7.png" width="50%" alt="ファイルアップロード">
+<img src="./ReadmeImage/image-7.png" width="100%" alt="ファイルアップロード">
 
-<img src="./ReadmeImage/Animation.gif" width="50%" alt="ファイルアップロード">
+<img src="./ReadmeImage/Animation.gif" width="100%" alt="ファイルアップロード">
 
 ## グループ招待
 
@@ -94,6 +94,6 @@ public function updateLock(Request $request, $id)
 - 参加するボタンを押下することでtodoを共有できるようになります。
 - アプリ内各所にmantineの通知を表示するようにしています。(画面右下表示)
 
-<img src="./ReadmeImage/image-4.png" width="25%" alt="ファイルアップロード">
+<img src="./ReadmeImage/image-4.png" width="100%" alt="ファイルアップロード">
 
-<img src="./ReadmeImage/image-5.png" width="25%" alt="ファイルアップロード">
+<img src="./ReadmeImage/image-5.png" width="100%" alt="ファイルアップロード">
