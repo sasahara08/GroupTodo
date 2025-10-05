@@ -1,0 +1,88 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: ./docker/php
+    volumes:
+      - ./backend/backend:/var/www/html
+    depends_on:
+      - db
+      - minio
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: laravel_vite
+      DB_USERNAME: laravel_user
+      DB_PASSWORD: pass
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      AWS_DEFAULT_REGION: ap-northeast-1
+      AWS_BUCKET: todo
+
+      # Xdebugの設定を追加/修正
+      XDEBUG_MODE: debug
+      XDEBUG_CONFIG: "client_host=host.docker.internal client_port=9003"
+    networks:
+      - laravel
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./backend/backend:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./frontend/dist:/var/www/html/frontend
+    depends_on:
+      - app
+    networks:
+      - laravel
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: laravel_vite
+      MYSQL_USER: laravel_user
+      MYSQL_PASSWORD: pass
+      MYSQL_ROOT_PASSWORD: pass
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - laravel
+
+  node:
+    build:
+      dockerfile: ./docker/vite/dockerfile
+      context: .
+    ports:
+      - "5173:5173"
+    networks:
+      - laravel
+    volumes:
+      - ./frontend:/app
+      # - /app/node_modules
+
+  minio:
+    image: minio/minio:latest
+    command: minio server /export --address :9000 --console-address :9001;"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - laravel
+
+networks:
+  laravel:
+
+volumes:
+  dbdata:
+  minio_data:

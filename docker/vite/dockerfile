@@ -1,0 +1,13 @@
+FROM node:22
+
+WORKDIR /app
+
+# 依存だけ先にコピー（キャッシュ活用）
+COPY ./frontend/package*.json ./
+RUN npm install
+RUN npm install -D tailwindcss postcss autoprefixer
+
+# ソース全体をコピー
+COPY ./frontend ./
+
+CMD ["npm", "run", "dev"]
