@@ -5,7 +5,7 @@
 
 # 概要
 
-疑似インターンで作成したGroupで共有するTodoアプリについて、レビューでアドバイスいただいた点を追加しブラッシュアップしたものです。
+自己のスキルアップの為にGroupで共有するTodoアプリを作成しました。
 
 <br>
 <br>
@@ -97,3 +97,6 @@ public function updateLock(Request $request, $id)
 <img src="./ReadmeImage/image-4.png" width="100%" alt="ファイルアップロード">
 
 <img src="./ReadmeImage/image-5.png" width="100%" alt="ファイルアップロード">
+
+
+## その他プログレスバー
