@@ -10,5 +10,5 @@ RUN npm install -D tailwindcss postcss autoprefixer
 # ソース全体をコピー
 COPY ./frontend ./
 
-CMD ["npm", "run", "dev", "--", "--host"]
+RUN npm run build
 
