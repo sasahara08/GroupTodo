@@ -65,7 +65,7 @@ services:
       - laravel
     volumes:
       - ./frontend:/app
-      # - /app/node_modules
+      - /app/node_modules
 
   minio:
     image: minio/minio:latest
