@@ -11,6 +11,11 @@ type Group_info = {
   id: number,
   name: string,
   is_member: boolean
+  pivot:{
+    group_id :number,
+    is_member:number,
+    user_id:number,
+  }
 }
 
 /**
@@ -30,9 +35,11 @@ export const useGroup = () => {
   const fetch_group_list = async () => {
     await create_axios.get('/group/getlist')
       .then(res => {
+        console.log('test',res);
         SetSideBarList(res.data.user_groups)
       })
       .catch(error => {
+        console.log('testerror',error);
         console.log(error)
       })
   }
