@@ -81,7 +81,7 @@ const LoginPage = () => {
         <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
 
           <TextInput
-            type='email'
+            type='text'
             label="メールアドレス"
             placeholder="メールアドレスを入力"
             radius="md"
