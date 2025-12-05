@@ -1,15 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
-  Icon2fa,
-  IconBellRinging,
   IconCirclePlus,
-  IconDatabaseImport,
-  IconFingerprint,
-  IconKey,
   IconLogout,
-  IconReceipt2,
-  IconSettings,
-  IconSwitchHorizontal,
 } from '@tabler/icons-react';
 import { Code, Group, Title, NavLink, ScrollArea, Modal, Card } from '@mantine/core';
 import classes from './Sidebar.module.css';
@@ -17,7 +9,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useDisclosure } from '@mantine/hooks';
 import { InputFormModal } from '@/components/modal/Modal';
 import { useGroup } from '@/hooks/useGroup';
-import create_axios from '@/axios';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { pustComplete } from '@/atoms/isChangeTodoAtom';
@@ -34,8 +25,8 @@ export function Sidebar() {
   const [post_complete, setPustComplete] = useAtom(pustComplete);
 
   // 参加している / 参加していないで分ける
-  const joinedGroups = sidebar_lists.filter(list => list.pivot.is_member);
-  const notJoinedGroups = sidebar_lists.filter(list => !list.pivot.is_member);
+  const joinedGroups = (sidebar_lists || []).filter(list => list.pivot.is_member);
+  const notJoinedGroups = (sidebar_lists || []).filter(list => !list.pivot.is_member);
 
   const joinedLinks = joinedGroups.map((list) => (
     <NavLink
