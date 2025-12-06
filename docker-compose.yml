@@ -3,9 +3,8 @@ version: "3.9"
 services:
   app:
     build:
-      context: ./docker/php
-    volumes:
-      - ./backend/backend:/var/www/html
+        context: .
+        dockerfile: ./docker/php/dockerfile
     depends_on:
       - db
       - minio
