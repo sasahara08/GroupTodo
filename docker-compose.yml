@@ -1,10 +1,15 @@
 version: "3.9"
 
 services:
+  services:
   app:
+    volumes:
+      - ./backend/backend:/var/www/html
+      - /var/www/html/vendor
     build:
-        context: .
-        dockerfile: ./docker/php/dockerfile
+      - context: .
+      - dockerfile: ./docker/php/dockerfile
+    
     depends_on:
       - db
       - minio
