@@ -21,7 +21,7 @@ services:
       - "80:80"
     volumes:
       - ./backend/backend:/var/www/html
-      - ./frontend/dist:/var/www/html/frontend
+      - ./frontend/dist:/etc/nginx/html
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - app
@@ -45,7 +45,7 @@ services:
       - "5173:5173"
     networks:
       - laravel
-    command: sh -c "npm install && npm run dev"
+    command: sh -c "npm install && npm run build"
     volumes:
       - ./frontend:/app
       - /app/node_modules
