@@ -15,6 +15,7 @@ import { useEffect } from 'react';
 import { NotificationAtom } from '@/atoms/notificationAtom';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotify } from '@/hooks/useNotifivations';
+import { useMediaQuery } from '@mantine/hooks';
 
 const LoginPage = () => {
   const form = useForm({
@@ -33,6 +34,7 @@ const LoginPage = () => {
   const notification = useAtomValue(NotificationAtom);
   const [display_notification] = useNotify();
   const { loginSubmit } = useAuth();
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   // 他画面→loginページ遷移時メッセージ
   useEffect(() => {
@@ -72,12 +74,12 @@ const LoginPage = () => {
 
 
   return (
-    <Container size={420} my={120}>
+    <Container size={isMobile ? '100%' : 420} my={isMobile ? 40 : 120} px={isMobile ? 'md' : 0}>
       <Title ta="center" className={classes.title}>
         ログイン
       </Title>
 
-      <Paper withBorder shadow="sm" p={22} mt={30} radius="md">
+      <Paper withBorder shadow="sm" p={isMobile ? 16 : 22} mt={30} radius="md">
         <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
 
           <TextInput

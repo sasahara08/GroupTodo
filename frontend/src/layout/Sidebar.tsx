@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import {
   IconCirclePlus,
   IconLogout,
+  IconX,
 } from '@tabler/icons-react';
-import { Code, Group, Title, NavLink, ScrollArea, Modal, Card } from '@mantine/core';
+import { Code, Group, Title, NavLink, ScrollArea, Modal, Card, ActionIcon } from '@mantine/core';
 import classes from './Sidebar.module.css';
 import { useAuth } from '@/hooks/useAuth';
 import { useDisclosure } from '@mantine/hooks';
@@ -15,7 +16,12 @@ import { pustComplete } from '@/atoms/isChangeTodoAtom';
 
 // { link: '', label: 'Authentication', icon: Icon2fa },
 
-export function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void;
+  isMobile?: boolean;
+}
+
+export function Sidebar({ onClose, isMobile }: SidebarProps) {
   const [active, setActive] = useState<number | null>(null);
   const [opened, { open, close }] = useDisclosure(false);
   const { logoutSubmit } = useAuth();
@@ -35,7 +41,10 @@ export function Sidebar() {
       component={Link}
       to={`/todo/${list.id}`}
       active={list.id === active}
-      onClick={() => setActive(list.id)}
+      onClick={() => {
+        setActive(list.id);
+        if (isMobile && onClose) onClose();
+      }}
     />
   ));
 
@@ -46,7 +55,10 @@ export function Sidebar() {
       component={Link}
       to={`/groupJoin/${list.id}`}
       active={list.id === active}
-      onClick={() => setActive(list.id)}
+      onClick={() => {
+        setActive(list.id);
+        if (isMobile && onClose) onClose();
+      }}
     />
   ));
 
@@ -61,8 +73,13 @@ export function Sidebar() {
     <>
       <Card className={classes.navbar}>
         <div className={classes.navbarMain}>
-          <Group className={classes.header} justify="left">
+          <Group className={classes.header} justify="space-between">
             <Title order={3}>Group Todo</Title>
+            {isMobile && (
+              <ActionIcon onClick={onClose} variant="subtle" color="gray">
+                <IconX size="1.2rem" />
+              </ActionIcon>
+            )}
           </Group>
           {notJoinedLinks && notJoinedLinks.length > 0 && (
             <>

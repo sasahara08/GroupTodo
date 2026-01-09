@@ -6,7 +6,7 @@ import type { Todo } from '@/type/Todo';
 import dayjs from 'dayjs';
 import { IconCheck, IconPencil, IconTrash, IconX } from '@tabler/icons-react';
 import { TodoModal } from './modal/TodoModal';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { useTodo } from '@/hooks/useTodo';
 
 type TableScrollAreaProps = {
@@ -21,6 +21,7 @@ export function TableScrollArea({ todos, setIsChangeTodo }: TableScrollAreaProps
   const [EditerOpened, { open: openEditer, close: closeEditer }] = useDisclosure(false);
   const { updateTodo, deleteTodo, changeCompleted } = useTodo();
   const today = dayjs();
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const open_reference_todo = (todo_id: number) => {
     setDisplayTodNumber(todo_id)
@@ -39,7 +40,7 @@ export function TableScrollArea({ todos, setIsChangeTodo }: TableScrollAreaProps
           <Table.Thead className={cx(classes.header, { [classes.scrolled]: scrolled })}>
             <Table.Tr>
               <Table.Th>タスク名</Table.Th>
-              <Table.Th>登録者</Table.Th>
+              {!isMobile && <Table.Th>登録者</Table.Th>}
               <Table.Th>期限</Table.Th>
               <Table.Th>ステータス</Table.Th>
               <Table.Th>操作</Table.Th>
@@ -54,7 +55,7 @@ export function TableScrollArea({ todos, setIsChangeTodo }: TableScrollAreaProps
                       <NavLink label={todo.title} onClick={() => open_reference_todo(todo.id)} />
                     </Text>
                   </Table.Td>
-                  <Table.Td>{todo?.user_name}</Table.Td>
+                  {!isMobile && <Table.Td>{todo?.user_name}</Table.Td>}
                   <Table.Td>
                     <Text fz="sm" c={
                       todo.due_date && dayjs(todo.due_date).isBefore(today) && !(todo.completed)
@@ -62,7 +63,7 @@ export function TableScrollArea({ todos, setIsChangeTodo }: TableScrollAreaProps
                         : undefined // それ以外はデフォルト
                     }>
                       {todo.due_date
-                        ? dayjs(todo.due_date).format('YYYY/MM/DD')
+                        ? dayjs(todo.due_date).format(isMobile ? 'MM/DD' : 'YYYY/MM/DD')
                         : '期限なし'}
                     </Text>
                   </Table.Td>
@@ -70,7 +71,7 @@ export function TableScrollArea({ todos, setIsChangeTodo }: TableScrollAreaProps
                     <Badge
                       variant="filled"
                       color={todo.completed ? 'teal' : 'red'}
-                      size="lg"
+                      size={isMobile ? 'sm' : 'lg'}
                       radius="xs"
                     >
                       {todo.completed ? '完了' : '未完了'}
@@ -83,23 +84,36 @@ export function TableScrollArea({ todos, setIsChangeTodo }: TableScrollAreaProps
                         variant="subtle"
                         color={todo.completed ? 'teal' : 'red'}
                         onClick={() => changeCompleted(todo.id)}
-                        mr={10}
+                        mr={isMobile ? 5 : 10}
+                        size={isMobile ? 'sm' : 'md'}
                       >
                         {todo.completed ? (
-                          <IconX style={{ width: rem(25), height: rem(25) }} />
+                          <IconX style={{ width: rem(isMobile ? 18 : 25), height: rem(isMobile ? 18 : 25) }} />
                         ) : (
-                          <IconCheck style={{ width: rem(25), height: rem(25) }} />
+                          <IconCheck style={{ width: rem(isMobile ? 18 : 25), height: rem(isMobile ? 18 : 25) }} />
                         )}
                       </ActionIcon>
                     </Tooltip>
                     <Tooltip label="編集">
-                      <ActionIcon onClick={() => open_todo_editer(todo.id)} variant="subtle" color="gray" mr={10}>
-                        <IconPencil style={{ width: rem(25), height: rem(25) }} />
+                      <ActionIcon
+                        onClick={() => open_todo_editer(todo.id)}
+                        variant="subtle"
+                        color="gray"
+                        mr={isMobile ? 5 : 10}
+                        size={isMobile ? 'sm' : 'md'}
+                      >
+                        <IconPencil style={{ width: rem(isMobile ? 18 : 25), height: rem(isMobile ? 18 : 25) }} />
                       </ActionIcon>
                     </Tooltip>
                     <Tooltip label="削除">
-                      <ActionIcon onClick={() => deleteTodo(todo.id)} variant="subtle" color="red" mr={10}>
-                        <IconTrash style={{ width: rem(25), height: rem(25) }} />
+                      <ActionIcon
+                        onClick={() => deleteTodo(todo.id)}
+                        variant="subtle"
+                        color="red"
+                        mr={isMobile ? 5 : 10}
+                        size={isMobile ? 'sm' : 'md'}
+                      >
+                        <IconTrash style={{ width: rem(isMobile ? 18 : 25), height: rem(isMobile ? 18 : 25) }} />
                       </ActionIcon>
                     </Tooltip>
                   </Group></Table.Td>

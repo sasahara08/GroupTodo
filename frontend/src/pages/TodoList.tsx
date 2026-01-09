@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import { Container, Title, Group, Button, Progress, Text, Box } from '@mantine/core';
+import { Container, Title, Group, Button, Progress, Text, Box, Stack } from '@mantine/core';
 import { IconCirclePlus, IconCrown, IconUser, IconUserPlus } from '@tabler/icons-react';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { TableScrollArea } from '@/components/TableScrollArea';
 import { InputFormModal } from '@/components/modal/Modal';
 import { TodoModal } from '@/components/modal/TodoModal';
@@ -19,6 +19,7 @@ export default function TodoList() {
   const [memberOpened, { open: openMember, close: closeMember }] = useDisclosure(false);
   const [display_notification] = useNotify();
   const notification = useAtomValue(NotificationAtom);
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const { group_id } = useParams();
   const {
@@ -59,12 +60,11 @@ export default function TodoList() {
   if (!groupData) return <Container my="md"><Title order={1}>グループが見つかりません</Title></Container>;
 
   return (
-    <Container my="md" maw={'100%'}>
+    <Container my="md" maw={'100%'} px={isMobile ? 'xs' : 'md'}>
       {/* ヘッダー */}
-      <Group justify="space-between" align="flex-end" mb="lg">
-        <Title order={1}>{groupData.name}</Title>
-        <Group>
-          {/* アイコン表示 */}
+      {isMobile ? (
+        <Stack gap="md" mb="lg">
+          <Title order={1}>{groupData.name}</Title>
           <Box
             style={{
               display: 'flex',
@@ -74,24 +74,57 @@ export default function TodoList() {
               borderColor: isHostUser ? 'gold' : 'gray',
               borderRadius: '12px',
               gap: '4px',
+              width: 'fit-content',
             }}
           >
             {isHostUser ? (
-              <Group align="center" mr={15}>
+              <Group align="center" gap="xs">
                 <IconCrown size={18} color="gold" />
                 <Text fz="sm">ホスト</Text>
               </Group>
             ) : (
-              <Group align="center" mr={15}>
+              <Group align="center" gap="xs">
                 <IconUser size={18} color="gray" />
                 <Text fz="sm">ゲスト</Text>
               </Group>
             )}
           </Box>
-          <Button leftSection={<IconCirclePlus size="1rem" />} onClick={openTask}>タスク追加</Button>
-          <Button leftSection={<IconUserPlus size="1rem" />} onClick={openMember}>グループ管理</Button>
+          <Button leftSection={<IconCirclePlus size="1rem" />} onClick={openTask} fullWidth>タスク追加</Button>
+          <Button leftSection={<IconUserPlus size="1rem" />} onClick={openMember} fullWidth>グループ管理</Button>
+        </Stack>
+      ) : (
+        <Group justify="space-between" align="flex-end" mb="lg">
+          <Title order={1}>{groupData.name}</Title>
+          <Group>
+            {/* アイコン表示 */}
+            <Box
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '2px 8px',
+                border: '1px solid',
+                borderColor: isHostUser ? 'gold' : 'gray',
+                borderRadius: '12px',
+                gap: '4px',
+              }}
+            >
+              {isHostUser ? (
+                <Group align="center" mr={15}>
+                  <IconCrown size={18} color="gold" />
+                  <Text fz="sm">ホスト</Text>
+                </Group>
+              ) : (
+                <Group align="center" mr={15}>
+                  <IconUser size={18} color="gray" />
+                  <Text fz="sm">ゲスト</Text>
+                </Group>
+              )}
+            </Box>
+            <Button leftSection={<IconCirclePlus size="1rem" />} onClick={openTask}>タスク追加</Button>
+            <Button leftSection={<IconUserPlus size="1rem" />} onClick={openMember}>グループ管理</Button>
+          </Group>
         </Group>
-      </Group>
+      )}
 
       {/* 進捗 */}
       <Progress.Root size="xl" mb="lg" radius="md">

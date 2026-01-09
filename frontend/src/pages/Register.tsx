@@ -6,11 +6,13 @@ import { IconArrowLeft } from '@tabler/icons-react';
 import { useSetAtom } from 'jotai';
 import { NotificationAtom } from '@/atoms/notificationAtom';
 import axios from 'axios';
+import { useMediaQuery } from '@mantine/hooks';
 
 const RegisterPage = () => {
 
   const navigate = useNavigate();
   const setNotificationmessage = useSetAtom(NotificationAtom);
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const form = useForm({
     initialValues: {
@@ -74,7 +76,7 @@ const RegisterPage = () => {
   };
 
   return (
-    <Box mx="auto" maw={500} mt="xl"
+    <Box mx="auto" maw={isMobile ? '100%' : 500} mt={isMobile ? 'md' : 'xl'} px={isMobile ? 'md' : 0}
       component='form'
       onSubmit={form.onSubmit((values) => handleSubmit(values))}>
       <Center>
@@ -91,7 +93,7 @@ const RegisterPage = () => {
         </ActionIcon>
         <Title my="xl">新規登録</Title>
       </Center>
-      <Paper withBorder shadow="sm" p={22} radius="md">
+      <Paper withBorder shadow="sm" p={isMobile ? 16 : 22} radius="md">
         <TextInput label="氏名" {...form.getInputProps('name')} />
         <TextInput label="メールアドレス" {...form.getInputProps('email')} mt="sm" />
         <PasswordInput label="パスワード" {...form.getInputProps('password')} mt="sm" />
@@ -102,7 +104,7 @@ const RegisterPage = () => {
 
         />
         <Center>
-          <Button type="submit" fullWidth mt="xl" w='50%'>
+          <Button type="submit" fullWidth mt="xl" w={isMobile ? '100%' : '50%'}>
             登録
           </Button>
         </Center>

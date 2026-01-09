@@ -7,6 +7,13 @@
   border-right: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
 }
 
+@media (max-width: 768px) {
+  .navbar {
+    width: 280px;
+    max-width: 80vw;
+  }
+}
+
 .navbarMain {
   flex: 1;
   overflow: hidden
