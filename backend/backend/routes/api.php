@@ -52,12 +52,11 @@ Route::post('/email/verification-notification', [EmailVerificationNotificationCo
 |--------------------------------------------------------------------------
 | 認証済みユーザー向けAPIルート
 |--------------------------------------------------------------------------
-| ほとんどのAPIエンドポイントはauth:sanctumでステートレスに処理されます。
 */
 
 // ログイン済みユーザー情報の取得
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user(); // Auth::user() ではなく $request->user() を使う方が一般的です
+    return $request->user();
 });
 
 
