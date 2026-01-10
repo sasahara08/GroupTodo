@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Auth;
 
     // 登録ルート
     Route::post('/register', [RegisteredUserController::class, 'store'])
-        ->middleware('guest')
         ->name('register');
 
     // ログインルート (webミドルウェアでセッションを有効化)
