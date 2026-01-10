@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-Route::middleware('web')->group(function () {
+
 
     // 登録ルート
     Route::post('/register', [RegisteredUserController::class, 'store'])
@@ -36,7 +36,7 @@ Route::middleware('web')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout')
         ->middleware('auth:sanctum'); // 認証済みユーザーのみ
-});
+
 
 
 Route::get('/verify-email/{id}/{hash}', VerifyEmailController::class)

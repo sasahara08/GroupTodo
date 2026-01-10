@@ -8,6 +8,19 @@ export default defineConfig({
     host: true,        // 外部アクセスを許可
     port: 5173,        // ポート番号（任意で変更可能）
     strictPort: true,  // ポートが使われていたらエラーにする
+    proxy: {
+      // /api と /sanctum へのリクエストをバックエンドにプロキシ
+      '/api': {
+        target: 'http://localhost:80',  // Nginxが動作しているポート
+        changeOrigin: true,
+        secure: false,
+      },
+      '/sanctum': {
+        target: 'http://localhost:80',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   optimizeDeps: {
     include: ['@mantine/core', '@mantine/hooks'],
