@@ -8,4 +8,5 @@ RUN apt update \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY ./backend/backend /var/www/html
+COPY docker/php/php.ini /usr/local/etc/php/php.ini
 RUN composer install --no-dev --optimize-autoloader
