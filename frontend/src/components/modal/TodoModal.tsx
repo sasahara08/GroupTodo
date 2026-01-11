@@ -132,6 +132,7 @@ export function TodoModal({
             centered
             size={isMobile ? '95%' : 'lg'}
             title={<Title order={2} mt={10} ml={20}>{modalTitle}</Title>}
+            portalProps={isMobile ? undefined : { target: '#main-content' }}
         >
             <Card shadow="sm" padding="lg" radius="md" withBorder>
                 {is_lock && (

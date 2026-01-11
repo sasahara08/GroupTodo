@@ -52,6 +52,7 @@ export function InputFormModal({ modalTitle, inputPlaceholder, buttonText, opene
       centered
       size={isMobile ? '95%' : 800}
       title={<Title order={2} mt={10} ml={20}>{modalTitle}</Title>}
+      portalProps={isMobile ? undefined : { target: '#main-content' }}
     >
       <Container size={isMobile ? '100%' : 800} my={10}>
         <form onSubmit={form.onSubmit((values) => handleSubmit(values.value))}>
@@ -64,4 +65,3 @@ export function InputFormModal({ modalTitle, inputPlaceholder, buttonText, opene
     </Modal>
   );
 }
-
