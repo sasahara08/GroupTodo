@@ -20,8 +20,14 @@ export function TableScrollArea({ todos, setIsChangeTodo }: TableScrollAreaProps
   const [ReferenceOpened, { open: openReference, close: closeReference }] = useDisclosure(false);
   const [EditerOpened, { open: openEditer, close: closeEditer }] = useDisclosure(false);
   const { updateTodo, deleteTodo, changeCompleted } = useTodo();
+  const [localTodos, setLocalTodos] = useState<Todo[]>(todos);
   const today = dayjs();
   const isMobile = useMediaQuery('(max-width: 768px)');
+
+  // todosが更新されたらlocalTodosも更新
+  useEffect(() => {
+    setLocalTodos(todos);
+  }, [todos]);
 
   const open_reference_todo = (todo_id: number) => {
     setDisplayTodNumber(todo_id)
@@ -32,6 +38,26 @@ export function TableScrollArea({ todos, setIsChangeTodo }: TableScrollAreaProps
     setDisplayTodNumber(todo_id)
     openEditer()
   }
+
+  // 楽観的UI更新: 即座にUIを更新し、バックグラウンドでAPIを呼ぶ
+  const handleToggleComplete = async (todo_id: number) => {
+    // 即座にローカル状態を更新
+    setLocalTodos(prevTodos =>
+      prevTodos.map(todo =>
+        todo.id === todo_id ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
+
+    // バックグラウンドでAPIを呼ぶ（awaitしない）
+    changeCompleted(todo_id).catch(() => {
+      // エラーが発生した場合は元に戻す
+      setLocalTodos(prevTodos =>
+        prevTodos.map(todo =>
+          todo.id === todo_id ? { ...todo, completed: !todo.completed } : todo
+        )
+      );
+    });
+  };
 
   return (
     <>
@@ -47,21 +73,15 @@ export function TableScrollArea({ todos, setIsChangeTodo }: TableScrollAreaProps
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {todos.length > 0 ? (
-              todos.map((todo) => (
+            {localTodos.length > 0 ? (
+              localTodos.map((todo) => (
                 <Table.Tr key={todo.id}>
-                  <Table.Td>
-                    <Text fz="sm" fw={500}>
-                      <NavLink label={todo.title} onClick={() => open_reference_todo(todo.id)} />
-                    </Text>
+                  <Table.Td onClick={() => open_reference_todo(todo.id)} style={{ cursor: 'pointer' }}>
+                    {todo.title}
                   </Table.Td>
                   {!isMobile && <Table.Td>{todo?.user_name}</Table.Td>}
                   <Table.Td>
-                    <Text fz="sm" c={
-                      todo.due_date && dayjs(todo.due_date).isBefore(today) && !(todo.completed)
-                        ? 'red' // 今日より前なら赤
-                        : undefined // それ以外はデフォルト
-                    }>
+                    <Text fz="sm">
                       {todo.due_date
                         ? dayjs(todo.due_date).format(isMobile ? 'MM/DD' : 'YYYY/MM/DD')
                         : '期限なし'}
@@ -69,10 +89,8 @@ export function TableScrollArea({ todos, setIsChangeTodo }: TableScrollAreaProps
                   </Table.Td>
                   <Table.Td>
                     <Badge
-                      variant="filled"
                       color={todo.completed ? 'teal' : 'red'}
                       size={isMobile ? 'sm' : 'lg'}
-                      radius="xs"
                     >
                       {todo.completed ? '完了' : '未完了'}
                     </Badge>
@@ -83,7 +101,7 @@ export function TableScrollArea({ todos, setIsChangeTodo }: TableScrollAreaProps
                       <ActionIcon
                         variant="subtle"
                         color={todo.completed ? 'teal' : 'red'}
-                        onClick={() => changeCompleted(todo.id)}
+                        onClick={() => handleToggleComplete(todo.id)}
                         mr={isMobile ? 5 : 10}
                         size={isMobile ? 'sm' : 'md'}
                       >

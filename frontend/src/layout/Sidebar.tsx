@@ -73,11 +73,11 @@ export function Sidebar({ onClose, isMobile }: SidebarProps) {
     <>
       <Card className={classes.navbar}>
         <div className={classes.navbarMain}>
-          <Group className={classes.header} justify="space-between">
-            <Title order={3}>Group Todo</Title>
+          <Group className={classes.header} justify="space-between" mb="md" wrap="nowrap">
+            <Title order={3} style={{ flexShrink: 0 }}>Group Todo</Title>
             {isMobile && (
-              <ActionIcon onClick={onClose} variant="subtle" color="gray">
-                <IconX size="1.2rem" />
+              <ActionIcon onClick={onClose} variant="subtle" color="gray" size="lg">
+                <IconX size="1.5rem" />
               </ActionIcon>
             )}
           </Group>

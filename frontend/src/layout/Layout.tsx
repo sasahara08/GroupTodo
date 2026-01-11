@@ -20,8 +20,8 @@ const Layout = () => {
   return (
     <MantineProvider theme={{ components: { Modal: { defaultProps: { zIndex: 1001 } } } }}>
       <Flex direction="row" style={{ height: '100vh', position: 'relative' }} p='1'>
-        {/* ハンバーガーメニューボタン（モバイルのみ） */}
-        {isMobile && (
+        {/* ハンバーガーメニューボタン（モバイルのみ、サイドバーが閉じているときのみ表示） */}
+        {isMobile && !sidebarOpened && (
           <Box style={{ position: 'fixed', top: 16, left: 16, zIndex: 1000, backgroundColor: 'var(--mantine-color-body)', borderRadius: '8px', padding: '4px' }}>
             <Burger opened={sidebarOpened} onClick={toggleSidebar} size="sm" />
           </Box>
