@@ -1,15 +1,14 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Models\Todo;
+use App\Http\Requests\TodoRequest;
 use App\Models\Group;
+use App\Models\Todo;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\TodoRequest;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class TodoController extends Controller
 {
@@ -20,15 +19,15 @@ class TodoController extends Controller
     public function updateLock(Request $request, $id)
     {
         try {
-            $todo = Todo::find($id);
-            $user = Auth::user();
-            $opened = $request->boolean('opened');
+            $todo         = Todo::find($id);
+            $user         = Auth::user();
+            $opened       = $request->boolean('opened');
             $is_lock_user = $todo->lock_user_id === $user->id;
             // 編集モーダルオープン時
             if ($opened) {
-                if (!($todo->lock_time) || $todo->lock_time->diffInMinutes(now()) > 30 || $is_lock_user) {
+                if (! ($todo->lock_time) || $todo->lock_time->diffInMinutes(now()) > 30 || $is_lock_user) {
                     // 排他ロック登録
-                    $todo->lock_time = now();
+                    $todo->lock_time    = now();
                     $todo->lock_user_id = Auth::id();
                     $todo->save();
                     return response()->json(['is_lock' => false, 'lock_user' => $user->name], 201);
@@ -39,7 +38,7 @@ class TodoController extends Controller
                 }
                 // ロックユーザーがモーダルをクローズ
             } else if ($is_lock_user) {
-                $todo->lock_time = null;
+                $todo->lock_time    = null;
                 $todo->lock_user_id = null;
                 $todo->save();
                 return response()->json(['is_lock' => false, 'lock_user' => ''], 201);
@@ -56,17 +55,17 @@ class TodoController extends Controller
     public function store(TodoRequest $request)
     {
         $validatedData = $request->validated();
-        $image_url = null;
+        $image_url     = null;
 
         $todo = Todo::create([
-            'user_id' => Auth::id(),
-            'group_id' => $validatedData['group_id'] ?? null,
-            'title' => $validatedData['title'],
-            'description' => $validatedData['details'] ?? null,
-            'due_date' => $validatedData['due_date'] ?? null,
-            'image_url' => null,
-            'completed' => false,
-            'lock_time' => null,
+            'user_id'      => Auth::id(),
+            'group_id'     => $validatedData['group_id'] ?? null,
+            'title'        => $validatedData['title'],
+            'description'  => $validatedData['details'] ?? null,
+            'due_date'     => $validatedData['due_date'] ?? null,
+            'image_url'    => null,
+            'completed'    => false,
+            'lock_time'    => null,
             'lock_user_id' => null,
         ]);
 
@@ -74,13 +73,13 @@ class TodoController extends Controller
         if ($request->hasFile('file')) {
             try {
                 // ファイル情報を取得
-                $file = $request->file('file');
+                $file      = $request->file('file');
                 $extension = $file->getClientOriginalExtension();
                 // todoのidを使ってファイル名固定
                 $path = "todos/{$todo->id}.$extension";
                 // $file のコンテンツを直接 put
-                Storage::disk('s3')->put($path, file_get_contents($file));
-                $image_url = Storage::disk('s3')->url($path);
+                Storage::put($path, file_get_contents($file));
+                $image_url       = Storage::url($path);
                 $todo->image_url = $image_url;
                 $todo->save();
             } catch (\Exception $e) {
@@ -98,7 +97,7 @@ class TodoController extends Controller
     public function show($id)
     {
         $group = Group::with('todos.user')->find($id);
-        if (!$group) {
+        if (! $group) {
             return response()->json(['message' => '不明なグループのタスクです'], 404);
         }
 
@@ -108,24 +107,25 @@ class TodoController extends Controller
         $todosWithUserName = $group->todos->map(function ($todo) {
             $base64Image = null;
 
-            Log::info("S3 file not found: $todo");
+            Log::info("file not found: $todo");
             if ($todo->image_url) {
                 try {
                     // フルURLからパスを抽出
                     $path = parse_url($todo->image_url, PHP_URL_PATH);
                     $path = ltrim($path, '/');
-                    Log::info("S3 file not found: $path");
+                    Log::info("file not found: $path");
 
                     // DBにバケット名付きで保存されている場合
-                    $bucket = config('filesystems.disks.s3.bucket');
+                    $defaultDisk = config('filesystems.default');
+                    $bucket      = config("filesystems.disks.{$defaultDisk}.bucket");
                     if (str_starts_with($path, $bucket . '/')) {
                         $path = substr($path, strlen($bucket) + 1);
                     }
 
-                    if (Storage::disk('s3')->exists($path)) {
-                        $contents = Storage::disk('s3')->get($path);
+                    if (Storage::exists($path)) {
+                        $contents = Storage::get($path);
 
-                        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                        $finfo    = finfo_open(FILEINFO_MIME_TYPE);
                         $mimeType = finfo_buffer($finfo, $contents);
                         finfo_close($finfo);
 
@@ -135,24 +135,24 @@ class TodoController extends Controller
                     Log::error('Image retrieval failed: ' . $e->getMessage());
                 }
             }
-            Log::info("S3 file not found: $base64Image");
+            Log::info("file not found: $base64Image");
 
             return [
-                'id'          => $todo->id,
-                'title'       => $todo->title,
-                'description' => $todo->description,
-                'due_date'    => $todo->due_date,
-                'completed'   => $todo->completed,
+                'id'           => $todo->id,
+                'title'        => $todo->title,
+                'description'  => $todo->description,
+                'due_date'     => $todo->due_date,
+                'completed'    => $todo->completed,
                 'is_important' => $todo->is_important,
-                'image_url'   => $base64Image,
-                'user_name'   => $todo->user ? $todo->user->name : null,
+                'image_url'    => $base64Image,
+                'user_name'    => $todo->user ? $todo->user->name : null,
             ];
         });
 
         return response()->json([
-            'group'     => $group,
-            'todos'     => $todosWithUserName,
-            'hostuser'  => $is_hostuser,
+            'group'    => $group,
+            'todos'    => $todosWithUserName,
+            'hostuser' => $is_hostuser,
         ], 200);
     }
 
@@ -171,31 +171,32 @@ class TodoController extends Controller
             return response()->json(['message' => 'サーバーエラー'], 500);
         } else {
             $todo->lock_user_id = null;
-            $todo->lock_time = null;
+            $todo->lock_time    = null;
         }
-        $todo->title = $validatedData['title'];
+        $todo->title       = $validatedData['title'];
         $todo->description = $validatedData['details'] ?? null;
-        $todo->due_date = $validatedData['due_date'] ?? null;
+        $todo->due_date    = $validatedData['due_date'] ?? null;
 
         // ファイルがあるときファイルも更新
         if ($request->hasFile('file')) {
-            $file = $request->file('file');
+            $file      = $request->file('file');
             $extension = $file->getClientOriginalExtension();
-            $path = "todos/{$todo->id}.$extension";
-            Storage::disk('s3')->put($path, file_get_contents($file));
-            $image_url = Storage::disk('s3')->url($path);
+            $path      = "todos/{$todo->id}.$extension";
+            Storage::put($path, file_get_contents($file));
+            $image_url       = Storage::url($path);
             $todo->image_url = $image_url;
-        } else if (!($request->input('existingImage'))) {
+        } else if (! ($request->input('existingImage'))) {
             Log::info("完全削除: $request->input('existingImage')");
-            $path = parse_url($todo->image_url, PHP_URL_PATH);
-            $path = ltrim($path, '/');
-            $bucket = config('filesystems.disks.s3.bucket');
+            $path        = parse_url($todo->image_url, PHP_URL_PATH);
+            $path        = ltrim($path, '/');
+            $defaultDisk = config('filesystems.default');
+            $bucket      = config("filesystems.disks.{$defaultDisk}.bucket");
             if (str_starts_with($path, $bucket . '/')) {
                 $path = substr($path, strlen($bucket) + 1);
             }
 
-            if (Storage::disk('s3')->exists($path)) {
-                Storage::disk('s3')->delete($path);
+            if (Storage::exists($path)) {
+                Storage::delete($path);
             }
 
             $todo->image_url = null;
@@ -219,17 +220,18 @@ class TodoController extends Controller
                 $path = parse_url($todo->image_url, PHP_URL_PATH);
                 $path = ltrim($path, '/');
                 // DBにバケット名付きで保存されている場合 → バケット部分を削除
-                $bucket = config('filesystems.disks.s3.bucket');
+                $defaultDisk = config('filesystems.default');
+                $bucket      = config("filesystems.disks.{$defaultDisk}.bucket");
                 if (str_starts_with($path, $bucket . '/')) {
                     $path = substr($path, strlen($bucket) + 1);
                 }
 
-                if (Storage::disk('s3')->exists($path)) {
-                    Storage::disk('s3')->delete($path);
+                if (Storage::exists($path)) {
+                    Storage::delete($path);
                 }
             }
         } catch (\Exception $e) {
-            Log::error("S3ファイル削除失敗: " . $e->getMessage());
+            Log::error("ファイル削除失敗: " . $e->getMessage());
         }
 
         $todo->delete();
@@ -244,7 +246,7 @@ class TodoController extends Controller
     {
         $todo = Todo::findOrFail($id);
 
-        $todo->completed = !($todo->completed);
+        $todo->completed = ! ($todo->completed);
         $todo->save();
         return;
     }

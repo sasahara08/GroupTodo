@@ -1,25 +1,24 @@
 <?php
-
 namespace App\Services;
 
-use App\Models\Todo;
 use App\Models\Group;
+use App\Models\Todo;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class TodoService
 {
     public function updateLock($id, bool $opened)
     {
-        $todo = Todo::findOrFail($id);
-        $user = Auth::user();
+        $todo       = Todo::findOrFail($id);
+        $user       = Auth::user();
         $isLockUser = $todo->lock_user_id === $user->id;
 
         if ($opened) {
-            if (!($todo->lock_time) || $todo->lock_time->diffInMinutes(now()) > 30 || $isLockUser) {
-                $todo->lock_time = now();
+            if (! ($todo->lock_time) || $todo->lock_time->diffInMinutes(now()) > 30 || $isLockUser) {
+                $todo->lock_time    = now();
                 $todo->lock_user_id = $user->id;
                 $todo->save();
                 return ['is_lock' => false, 'lock_user' => $user->name];
@@ -28,7 +27,7 @@ class TodoService
                 return ['is_lock' => true, 'lock_user' => $lockUser->name];
             }
         } elseif ($isLockUser) {
-            $todo->lock_time = null;
+            $todo->lock_time    = null;
             $todo->lock_user_id = null;
             $todo->save();
             return ['is_lock' => false, 'lock_user' => ''];
@@ -99,24 +98,25 @@ class TodoService
     private function uploadImage($todoId, $file)
     {
         $extension = $file->getClientOriginalExtension();
-        $path = "todos/{$todoId}.{$extension}";
-        Storage::disk('s3')->put($path, file_get_contents($file));
-        return Storage::disk('s3')->url($path);
+        $path      = "todos/{$todoId}.{$extension}";
+        Storage::put($path, file_get_contents($file));
+        return Storage::url($path);
     }
 
     private function deleteImage($imageUrl)
     {
         try {
-            $path = ltrim(parse_url($imageUrl, PHP_URL_PATH), '/');
-            $bucket = config('filesystems.disks.s3.bucket');
+            $path        = ltrim(parse_url($imageUrl, PHP_URL_PATH), '/');
+            $defaultDisk = config('filesystems.default');
+            $bucket      = config("filesystems.disks.{$defaultDisk}.bucket");
             if (str_starts_with($path, $bucket . '/')) {
                 $path = substr($path, strlen($bucket) + 1);
             }
-            if (Storage::disk('s3')->exists($path)) {
-                Storage::disk('s3')->delete($path);
+            if (Storage::exists($path)) {
+                Storage::delete($path);
             }
         } catch (\Exception $e) {
-            Log::error("S3ファイル削除失敗: " . $e->getMessage());
+            Log::error("ファイル削除失敗: " . $e->getMessage());
         }
     }
 }
