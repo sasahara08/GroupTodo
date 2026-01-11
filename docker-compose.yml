@@ -1,7 +1,5 @@
 services:
   app:
-    volumes:
-      - ./backend/backend:/var/www/html
     build:
       context: .
       dockerfile: ./docker/php/Dockerfile
@@ -18,7 +16,6 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./backend/backend:/var/www/html
       - ./frontend/dist:/etc/nginx/html
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
