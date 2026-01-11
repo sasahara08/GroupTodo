@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react';
 import type { FormValues, Todo } from '@/type/Todo';
 import dayjs from 'dayjs';
 import { useTodo } from '@/hooks/useTodo';
+import { useMediaQuery } from '@mantine/hooks';
 
 type Props = {
     modalTitle: string;
@@ -47,6 +48,7 @@ export function TodoModal({
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [existingImage, setExistingImage] = useState<string | null>(null);
     const { is_lock, editer_lock_user, edit_lock } = useTodo()
+    const isMobile = useMediaQuery('(max-width: 768px)');
 
 
 
@@ -112,7 +114,7 @@ export function TodoModal({
             return;
         }
         if (propsMethod) {
-            const res = await propsMethod(display_todo_number, {...values}, group_id, file);
+            const res = await propsMethod(display_todo_number, { ...values }, group_id, file);
             if (res) {
                 form.setErrors(res);
                 return;
@@ -128,7 +130,7 @@ export function TodoModal({
             opened={opened}
             onClose={close}
             centered
-            size="lg"
+            size={isMobile ? '95%' : 'lg'}
             title={<Title order={2} mt={10} ml={20}>{modalTitle}</Title>}
         >
             <Card shadow="sm" padding="lg" radius="md" withBorder>
